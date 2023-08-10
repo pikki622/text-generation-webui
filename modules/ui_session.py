@@ -8,12 +8,10 @@ from modules.utils import gradio
 def create_ui():
     with gr.Tab("Session", elem_id="session-tab"):
         modes = ["default", "notebook", "chat"]
-        current_mode = "default"
-        for mode in modes[1:]:
-            if getattr(shared.args, mode):
-                current_mode = mode
-                break
-
+        current_mode = next(
+            (mode for mode in modes[1:] if getattr(shared.args, mode)),
+            "default",
+        )
         cmd_list = vars(shared.args)
         bool_list = sorted([k for k in cmd_list if type(cmd_list[k]) is bool and k not in modes + ui.list_model_elements()])
         bool_active = [k for k in bool_list if vars(shared.args)[k]]

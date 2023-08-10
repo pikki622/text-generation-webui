@@ -49,7 +49,7 @@ class LlamacppHF(PreTrainedModel):
         return torch.device(0)
 
     def __call__(self, *args, **kwargs):
-        input_ids = args[0] if len(args) > 0 else kwargs['input_ids']
+        input_ids = args[0] if args else kwargs['input_ids']
         use_cache = kwargs.get('use_cache', True)
         labels = kwargs.get('labels', None)
         cache = kwargs.get('past_key_values', None)
@@ -91,16 +91,12 @@ class LlamacppHF(PreTrainedModel):
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path: Optional[Union[str, os.PathLike]], *model_args, **kwargs):
-        assert len(model_args) == 0 and len(kwargs) == 0, "extra args is currently not supported"
+        assert not model_args and not kwargs, "extra args is currently not supported"
         if isinstance(pretrained_model_name_or_path, str):
             pretrained_model_name_or_path = Path(pretrained_model_name_or_path)
 
         path = Path(f'{shared.args.model_dir}') / Path(pretrained_model_name_or_path)
-        if path.is_file():
-            model_file = path
-        else:
-            model_file = list(path.glob('*ggml*.bin'))[0]
-
+        model_file = path if path.is_file() else list(path.glob('*ggml*.bin'))[0]
         logger.info(f"llama.cpp weights detected: {model_file}\n")
         params = {
             'model_path': str(model_file),

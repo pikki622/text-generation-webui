@@ -47,28 +47,59 @@ def create_ui():
 
 
 def create_event_handlers():
-    gen_events = []
     shared.input_params = gradio('textbox', 'interface_state')
     output_params = gradio('output_textbox', 'html')
 
-    gen_events.append(shared.gradio['Generate'].click(
-        lambda x: x, gradio('textbox'), gradio('last_input')).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        generate_reply_wrapper, shared.input_params, output_params, show_progress=False).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda: None, None, None, _js=f"() => {{{ui.audio_notification_js}}}")
-        # lambda: None, None, None, _js="() => {element = document.getElementsByTagName('textarea')[0]; element.scrollTop = element.scrollHeight}")
-    )
-
-    gen_events.append(shared.gradio['textbox'].submit(
-        lambda x: x, gradio('textbox'), gradio('last_input')).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        generate_reply_wrapper, shared.input_params, output_params, show_progress=False).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda: None, None, None, _js=f"() => {{{ui.audio_notification_js}}}")
-        # lambda: None, None, None, _js="() => {element = document.getElementsByTagName('textarea')[0]; element.scrollTop = element.scrollHeight}")
-    )
-
+    gen_events = [
+        shared.gradio['Generate']
+        .click(lambda x: x, gradio('textbox'), gradio('last_input'))
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            generate_reply_wrapper,
+            shared.input_params,
+            output_params,
+            show_progress=False,
+        )
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            lambda: None,
+            None,
+            None,
+            _js=f"() => {{{ui.audio_notification_js}}}",
+        ),
+        shared.gradio['textbox']
+        .submit(lambda x: x, gradio('textbox'), gradio('last_input'))
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            generate_reply_wrapper,
+            shared.input_params,
+            output_params,
+            show_progress=False,
+        )
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            lambda: None,
+            None,
+            None,
+            _js=f"() => {{{ui.audio_notification_js}}}",
+        ),
+    ]
     shared.gradio['markdown_render'].click(lambda x: x, gradio('output_textbox'), gradio('markdown'), queue=False)
     gen_events.append(shared.gradio['Continue'].click(
         ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
@@ -81,14 +112,19 @@ def create_event_handlers():
     shared.gradio['Stop'].click(stop_everything_event, None, None, queue=False, cancels=gen_events if shared.args.no_stream else None)
     shared.gradio['prompt_menu'].change(load_prompt, gradio('prompt_menu'), gradio('textbox'), show_progress=False)
     shared.gradio['save_prompt'].click(
-        lambda x: x, gradio('textbox'), gradio('save_contents')).then(
-        lambda: 'prompts/', None, gradio('save_root')).then(
-        lambda: utils.current_time() + '.txt', None, gradio('save_filename')).then(
-        lambda: gr.update(visible=True), None, gradio('file_saver'))
+        lambda x: x, gradio('textbox'), gradio('save_contents')
+    ).then(lambda: 'prompts/', None, gradio('save_root')).then(
+        lambda: f'{utils.current_time()}.txt', None, gradio('save_filename')
+    ).then(
+        lambda: gr.update(visible=True), None, gradio('file_saver')
+    )
 
     shared.gradio['delete_prompt'].click(
-        lambda: 'prompts/', None, gradio('delete_root')).then(
-        lambda x: x + '.txt', gradio('prompt_menu'), gradio('delete_filename')).then(
-        lambda: gr.update(visible=True), None, gradio('file_deleter'))
+        lambda: 'prompts/', None, gradio('delete_root')
+    ).then(
+        lambda x: f'{x}.txt', gradio('prompt_menu'), gradio('delete_filename')
+    ).then(
+        lambda: gr.update(visible=True), None, gradio('file_deleter')
+    )
 
     shared.gradio['count_tokens'].click(count_tokens, gradio('textbox'), gradio('status'), show_progress=False)

@@ -130,7 +130,7 @@ def create_interface():
         # Interface launch events
         if shared.settings['dark_theme']:
             shared.gradio['interface'].load(lambda: None, None, None, _js="() => document.getElementsByTagName('body')[0].classList.add('dark')")
-            
+
         shared.gradio['interface'].load(lambda: None, None, None, _js=f"() => {{{js}}}")
         shared.gradio['interface'].load(partial(ui.apply_interface_values, {}, use_persistent=True), None, gradio(ui.list_interface_input_elements()), show_progress=False)
         if shared.is_chat():
@@ -145,13 +145,16 @@ def create_interface():
         shared.gradio['interface'].launch(
             prevent_thread_lock=True,
             share=shared.args.share,
-            server_name=None if not shared.args.listen else (shared.args.listen_host or '0.0.0.0'),
+            server_name=None
+            if not shared.args.listen
+            else (shared.args.listen_host or '0.0.0.0'),
             server_port=shared.args.listen_port,
             inbrowser=shared.args.auto_launch,
             auth=auth or None,
-            ssl_verify=False if (shared.args.ssl_keyfile or shared.args.ssl_certfile) else True,
+            ssl_verify=not shared.args.ssl_keyfile
+            and not shared.args.ssl_certfile,
             ssl_keyfile=shared.args.ssl_keyfile,
-            ssl_certfile=shared.args.ssl_certfile
+            ssl_certfile=shared.args.ssl_certfile,
         )
 
 
