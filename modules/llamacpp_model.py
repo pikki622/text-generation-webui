@@ -39,12 +39,12 @@ class LlamaCppModel:
         self.model.__del__()
 
     @classmethod
-    def from_pretrained(self, path):
+    def from_pretrained(cls, path):
 
         Llama = llama_cpp_lib().Llama
         LlamaCache = llama_cpp_lib().LlamaCache
 
-        result = self()
+        result = cls()
         cache_capacity = 0
         if shared.args.cache_capacity is not None:
             if 'GiB' in shared.args.cache_capacity:
@@ -54,7 +54,7 @@ class LlamaCppModel:
             else:
                 cache_capacity = int(shared.args.cache_capacity)
 
-        logger.info("Cache capacity is " + str(cache_capacity) + " bytes")
+        logger.info(f"Cache capacity is {cache_capacity} bytes")
         params = {
             'model_path': str(path),
             'n_ctx': shared.args.n_ctx,

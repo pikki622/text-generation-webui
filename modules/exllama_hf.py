@@ -47,7 +47,7 @@ class ExllamaHF(PreTrainedModel):
         return torch.device(0)
 
     def __call__(self, *args, **kwargs):
-        input_ids = args[0] if len(args) > 0 else kwargs['input_ids']
+        input_ids = args[0] if args else kwargs['input_ids']
         use_cache = kwargs.get('use_cache', True)
         labels = kwargs.get('labels', None)
         cache = kwargs.get('past_key_values', None)
@@ -84,7 +84,7 @@ class ExllamaHF(PreTrainedModel):
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path: Optional[Union[str, os.PathLike]], *model_args, **kwargs):
-        assert len(model_args) == 0 and len(kwargs) == 0, "extra args is currently not supported"
+        assert not model_args and not kwargs, "extra args is currently not supported"
         if isinstance(pretrained_model_name_or_path, str):
             pretrained_model_name_or_path = Path(pretrained_model_name_or_path)
 
@@ -94,8 +94,7 @@ class ExllamaHF(PreTrainedModel):
         # from 'oobabooga/text-generation-webui/modules/exllama.py'
         weight_path = None
         for ext in ['.safetensors', '.pt', '.bin']:
-            found = list(pretrained_model_name_or_path.glob(f"*{ext}"))
-            if len(found) > 0:
+            if found := list(pretrained_model_name_or_path.glob(f"*{ext}")):
                 weight_path = found[-1]
                 break
         assert weight_path is not None, f'could not find weight in "{pretrained_model_name_or_path}"'

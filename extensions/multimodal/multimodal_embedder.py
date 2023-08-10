@@ -51,11 +51,15 @@ class MultimodalEmbedder:
             else:
                 parts.append(PromptPart(text=self.pipeline.image_start()))
             # append the image
-            parts.append(PromptPart(
-                text=match.group(0),
-                image=Image.open(BytesIO(base64.b64decode(match.group(1)))) if load_images else None,
-                is_image=True
-            ))
+            parts.append(
+                PromptPart(
+                    text=match[0],
+                    image=Image.open(BytesIO(base64.b64decode(match[1])))
+                    if load_images
+                    else None,
+                    is_image=True,
+                )
+            )
             curr += match.end()
         return parts
 
@@ -87,11 +91,7 @@ class MultimodalEmbedder:
 
     @staticmethod
     def _num_images(parts: List[PromptPart]) -> int:
-        count = 0
-        for part in parts:
-            if part.is_image:
-                count += 1
-        return count
+        return sum(1 for part in parts if part.is_image)
 
     def _encode_text(self, state, parts: List[PromptPart]) -> List[PromptPart]:
         """Encode text to token_ids, also truncate the prompt, if necessary.
@@ -100,10 +100,10 @@ class MultimodalEmbedder:
         such that the context + min_rows don't fit, we can get a prompt which is too long.
         We can't truncate image embeddings, as it leads to broken generation, so remove the images instead and warn the user
         """
-        encoded: List[PromptPart] = []
-        for i, part in enumerate(parts):
-            encoded.append(self._encode_single_text(part, i == 0 and state['add_bos_token']))
-
+        encoded: List[PromptPart] = [
+            self._encode_single_text(part, i == 0 and state['add_bos_token'])
+            for i, part in enumerate(parts)
+        ]
         # truncation:
         max_len = get_max_prompt_length(state)
         removed_images = 0

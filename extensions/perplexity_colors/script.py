@@ -51,9 +51,7 @@ class PerplexityLogits(LogitsProcessor):
             self.selected_probs.append(1.0) # Placeholder for the last token of the prompt
 
         if self.verbose:
-            pplbar = "-"
-            if not np.isnan(perplexity):
-                pplbar = "*"*round(perplexity)
+            pplbar = "*"*round(perplexity) if not np.isnan(perplexity) else "-"
             print(f"{last_token}\t{perplexity:.2f}\t{pplbar}")
 
         # Get top 5 probabilities
@@ -63,7 +61,7 @@ class PerplexityLogits(LogitsProcessor):
 
         self.top_token_ids_list.append(top_token_ids)
         self.top_probs_list.append(top_probs)
-        
+
         probs = probs.cpu().numpy().flatten()
         self.last_probs = probs # Need to keep this as a reference for top probs
 
@@ -156,7 +154,7 @@ def perplexity_color_scale(ppl):
     value = hex(max(int(255.0 - params['ppl_scale']*(float(ppl)-1.0)), 0))[2:]
     if len(value) < 2:
         value = '0'*(2 - len(value)) + value
-    return 'ff' + value + value
+    return f'ff{value}{value}'
 
 # Green-yellow-red for probability and blue component for perplexity
 def probability_perplexity_color_scale(prob, ppl):

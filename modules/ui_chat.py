@@ -114,54 +114,165 @@ def create_ui():
 
 
 def create_event_handlers():
-    gen_events = []
-
     shared.input_params = gradio('Chat input', 'start_with', 'interface_state')
     clear_arr = gradio('Clear history-confirm', 'Clear history', 'Clear history-cancel')
     shared.reload_inputs = gradio('history', 'name1', 'name2', 'mode', 'chat_style')
 
-    gen_events.append(shared.gradio['Generate'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda x: (x, ''), gradio('textbox'), gradio('Chat input', 'textbox'), show_progress=False).then(
-        chat.generate_chat_reply_wrapper, shared.input_params, gradio('display', 'history'), show_progress=False).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        chat.save_persistent_history, gradio('history', 'character_menu', 'mode'), None).then(
-        lambda: None, None, None, _js=f"() => {{{ui.audio_notification_js}}}")
-    )
-
-    gen_events.append(shared.gradio['textbox'].submit(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda x: (x, ''), gradio('textbox'), gradio('Chat input', 'textbox'), show_progress=False).then(
-        chat.generate_chat_reply_wrapper, shared.input_params, gradio('display', 'history'), show_progress=False).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        chat.save_persistent_history, gradio('history', 'character_menu', 'mode'), None).then(
-        lambda: None, None, None, _js=f"() => {{{ui.audio_notification_js}}}")
-    )
-
-    gen_events.append(shared.gradio['Regenerate'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        partial(chat.generate_chat_reply_wrapper, regenerate=True), shared.input_params, gradio('display', 'history'), show_progress=False).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        chat.save_persistent_history, gradio('history', 'character_menu', 'mode'), None).then(
-        lambda: None, None, None, _js=f"() => {{{ui.audio_notification_js}}}")
-    )
-
-    gen_events.append(shared.gradio['Continue'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        partial(chat.generate_chat_reply_wrapper, _continue=True), shared.input_params, gradio('display', 'history'), show_progress=False).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        chat.save_persistent_history, gradio('history', 'character_menu', 'mode'), None).then(
-        lambda: None, None, None, _js=f"() => {{{ui.audio_notification_js}}}")
-    )
-
-    gen_events.append(shared.gradio['Impersonate'].click(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda x: x, gradio('textbox'), gradio('Chat input'), show_progress=False).then(
-        chat.impersonate_wrapper, shared.input_params, gradio('textbox'), show_progress=False).then(
-        ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
-        lambda: None, None, None, _js=f"() => {{{ui.audio_notification_js}}}")
-    )
-
+    gen_events = [
+        shared.gradio['Generate']
+        .click(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            lambda x: (x, ''),
+            gradio('textbox'),
+            gradio('Chat input', 'textbox'),
+            show_progress=False,
+        )
+        .then(
+            chat.generate_chat_reply_wrapper,
+            shared.input_params,
+            gradio('display', 'history'),
+            show_progress=False,
+        )
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            chat.save_persistent_history,
+            gradio('history', 'character_menu', 'mode'),
+            None,
+        )
+        .then(
+            lambda: None,
+            None,
+            None,
+            _js=f"() => {{{ui.audio_notification_js}}}",
+        ),
+        shared.gradio['textbox']
+        .submit(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            lambda x: (x, ''),
+            gradio('textbox'),
+            gradio('Chat input', 'textbox'),
+            show_progress=False,
+        )
+        .then(
+            chat.generate_chat_reply_wrapper,
+            shared.input_params,
+            gradio('display', 'history'),
+            show_progress=False,
+        )
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            chat.save_persistent_history,
+            gradio('history', 'character_menu', 'mode'),
+            None,
+        )
+        .then(
+            lambda: None,
+            None,
+            None,
+            _js=f"() => {{{ui.audio_notification_js}}}",
+        ),
+        shared.gradio['Regenerate']
+        .click(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            partial(chat.generate_chat_reply_wrapper, regenerate=True),
+            shared.input_params,
+            gradio('display', 'history'),
+            show_progress=False,
+        )
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            chat.save_persistent_history,
+            gradio('history', 'character_menu', 'mode'),
+            None,
+        )
+        .then(
+            lambda: None,
+            None,
+            None,
+            _js=f"() => {{{ui.audio_notification_js}}}",
+        ),
+        shared.gradio['Continue']
+        .click(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            partial(chat.generate_chat_reply_wrapper, _continue=True),
+            shared.input_params,
+            gradio('display', 'history'),
+            show_progress=False,
+        )
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            chat.save_persistent_history,
+            gradio('history', 'character_menu', 'mode'),
+            None,
+        )
+        .then(
+            lambda: None,
+            None,
+            None,
+            _js=f"() => {{{ui.audio_notification_js}}}",
+        ),
+        shared.gradio['Impersonate']
+        .click(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            lambda x: x,
+            gradio('textbox'),
+            gradio('Chat input'),
+            show_progress=False,
+        )
+        .then(
+            chat.impersonate_wrapper,
+            shared.input_params,
+            gradio('textbox'),
+            show_progress=False,
+        )
+        .then(
+            ui.gather_interface_values,
+            gradio(shared.input_elements),
+            gradio('interface_state'),
+        )
+        .then(
+            lambda: None,
+            None,
+            None,
+            _js=f"() => {{{ui.audio_notification_js}}}",
+        ),
+    ]
     shared.gradio['Replace last reply'].click(
         ui.gather_interface_values, gradio(shared.input_elements), gradio('interface_state')).then(
         chat.replace_last_reply, gradio('textbox', 'interface_state'), gradio('history')).then(
